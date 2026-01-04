@@ -154,18 +154,24 @@ header h1 {
     padding: 12px 16px;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    line-height: 1;
 }
 
 .menu-toggle:hover {
     background: var(--secondary-black);
+    transform: scale(1.05);
+}
+
+.menu-toggle:active {
+    transform: scale(0.95);
 }
 
 .sidebar {
     position: fixed;
-    left: -280px;
+    left: -300px;
     top: 0;
     width: 280px;
     height: 100vh;
@@ -173,7 +179,7 @@ header h1 {
     z-index: 1000;
     transition: left 0.3s ease;
     overflow-y: auto;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+    box-shadow: 4px 0 15px rgba(0,0,0,0.5);
 }
 
 .sidebar.active {
@@ -200,13 +206,13 @@ header h1 {
 .sidebar .tab-btn {
     display: block;
     width: 100%;
-    padding: 16px 20px;
+    padding: 18px 20px;
     border: none;
     background: transparent;
     color: var(--white);
     text-align: left;
     cursor: pointer;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
     border-bottom: 1px solid var(--accent-gray);
     transition: all 0.3s ease;
@@ -214,14 +220,16 @@ header h1 {
 
 .sidebar .tab-btn:hover {
     background: var(--secondary-black);
-    padding-left: 25px;
+    padding-left: 30px;
+    font-weight: 600;
 }
 
 .sidebar .tab-btn.active {
     background: var(--white);
     color: var(--primary-black);
-    border-left: 4px solid var(--primary-black);
+    border-left: 5px solid var(--primary-black);
     font-weight: 700;
+    padding-left: 25px;
 }
 
 .overlay {
@@ -433,17 +441,19 @@ header h1 {
     position: relative;
 }
 
-/* Scroll hint */
+/* Visual scroll indicator - shadow only */
+.table-scroll {
+    position: relative;
+}
+
 .table-scroll::after {
-    content: '→ Scroll';
+    content: '';
     position: absolute;
     right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    background: linear-gradient(90deg, transparent, var(--white) 30%);
-    padding: 10px 20px 10px 40px;
-    font-size: 12px;
-    color: var(--accent-gray);
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.05));
     pointer-events: none;
     opacity: 1;
     transition: opacity 0.3s;
@@ -713,9 +723,19 @@ footer {
    ============================================================================ */
 
 @media (max-width: 768px) {
-    /* Show hamburger menu */
+    /* Show hamburger menu - make it more prominent */
     .menu-toggle {
         display: block;
+        animation: pulse-button 2s infinite;
+    }
+
+    @keyframes pulse-button {
+        0%, 100% {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        50% {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 0 4px rgba(255,255,255,0.3);
+        }
     }
 
     /* Hide desktop tabs */
@@ -724,7 +744,7 @@ footer {
     }
 
     header {
-        padding: 25px 20px 25px 60px;
+        padding: 25px 20px 25px 65px;
     }
 
     header h1 {
@@ -795,10 +815,6 @@ footer {
         border-right: none;
     }
 
-    .table-scroll::after {
-        display: block;
-    }
-
     table {
         font-size: 13px;
     }
@@ -842,11 +858,11 @@ footer {
         top: 12px;
         left: 12px;
         padding: 10px 14px;
-        font-size: 16px;
+        font-size: 18px;
     }
 
     header {
-        padding: 20px 15px 20px 55px;
+        padding: 20px 15px 20px 60px;
     }
 
     header h1 {
