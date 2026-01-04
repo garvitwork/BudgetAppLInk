@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 Personal Finance Manager</h1>
+            <p class="subtitle">Complete Financial Intelligence System</p>
+        </header>
+
+        <!-- Profile Management -->
+        <div class="profile-section">
+            <div class="profile-buttons">
+                <button onclick="saveProfile()" class="btn btn-success" title="Save your financial profile">💾 Save Profile</button>
+                <button onclick="loadProfile()" class="btn btn-info" title="Load saved profile">📥 Load Profile</button>
+                <button onclick="clearProfile()" class="btn btn-danger" title="Clear saved profile">🗑️ Clear Profile</button>
+            </div>
+            <p id="profileStatus" class="profile-status"></p>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="notification" class="notification"></div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="core">Core Features</button>
+            <button class="tab-btn" data-tab="advanced">Advanced Analytics</button>
+            <button class="tab-btn" data-tab="behavioral">Behavioral Tools</button>
+            <button class="tab-btn" data-tab="strategic">Strategic Intelligence</button>
+        </div>
+
+        <!-- CORE FEATURES TAB -->
+        <div id="core" class="tab-content active">
+            <section class="card">
+                <h2>🎯 Budget Allocation</h2>
+                <form id="budgetForm">
+                    <div class="form-group">
+                        <label>Monthly Income (₹)</label>
+                        <input type="number" id="totalAmount" required min="0" step="0.01">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Savings (%)</label>
+                            <input type="number" id="savingsPct" required min="0" max="100" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Investments (%)</label>
+                            <input type="number" id="investmentPct" required min="0" max="100" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Personal (%)</label>
+                            <input type="number" id="personalPct" required min="0" max="100" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Misc (%)</label>
+                            <input type="number" id="miscPct" value="15" required min="0" max="100" step="0.01">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Calculate Budget</button>
+                </form>
+                <div id="budgetResult" class="result-box"></div>
+            </section>
+
+            <section class="card">
+                <h2>🎯 Combined Goals Analysis</h2>
+                <form id="combinedGoalsForm">
+                    <h3>Savings Goal</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Target Amount (₹)</label>
+                            <input type="number" id="savingsTarget" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Timeline (Months)</label>
+                            <input type="number" id="savingsMonths" required min="1">
+                        </div>
+                    </div>
+
+                    <h3>Investment Goal</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Target Amount (₹)</label>
+                            <input type="number" id="investmentTarget" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Timeline (Months)</label>
+                            <input type="number" id="investmentMonths" required min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Annual Return (%)</label>
+                            <input type="number" id="annualReturn" required min="0" step="0.01">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Analyze Goals</button>
+                </form>
+                <div id="combinedGoalsResult" class="result-box"></div>
+            </section>
+        </div>
+
+        <!-- ADVANCED ANALYTICS TAB -->
+        <div id="advanced" class="tab-content">
+            <section class="card">
+                <h2>📊 Expense Forecasting</h2>
+                <form id="expenseForecastForm">
+                    <div class="form-group">
+                        <label>Enter past monthly expenses (comma-separated, minimum 3 months)</label>
+                        <input type="text" id="expenseHistory" placeholder="e.g., 50000, 55000, 52000, 60000" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Forecast Expenses</button>
+                </form>
+                <div id="expenseForecastResult" class="result-box"></div>
+            </section>
+
+            <section class="card">
+                <h2>📈 Income Volatility Buffer</h2>
+                <form id="incomeVolatilityForm">
+                    <div class="form-group">
+                        <label>Enter past monthly income (comma-separated, minimum 2 months)</label>
+                        <input type="text" id="incomeHistory" placeholder="e.g., 100000, 95000, 110000, 98000" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Calculate Buffer</button>
+                </form>
+                <div id="incomeVolatilityResult" class="result-box"></div>
+            </section>
+
+            <section class="card">
+                <h2>💼 Tax-Loss Harvesting Tracker</h2>
+                <div id="investmentInputs">
+                    <div class="investment-entry">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Investment Name</label>
+                                <input type="text" class="invName" placeholder="e.g., Tech Stock">
+                            </div>
+                            <div class="form-group">
+                                <label>Purchase Value (₹)</label>
+                                <input type="number" class="invPurchase" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Current Value (₹)</label>
+                                <input type="number" class="invCurrent" min="0" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addInvestmentEntry()">+ Add Investment</button>
+                <button type="button" class="btn btn-primary" onclick="calculateTaxHarvesting()">Analyze Tax Opportunities</button>
+                <div id="taxHarvestingResult" class="result-box"></div>
+            </section>
+
+            <section class="card">
+                <h2>⏰ Opportunity Cost Calculator</h2>
+                <form id="opportunityCostForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Skipped Monthly Amount (₹)</label>
+                            <input type="number" id="skippedAmount" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Duration (Months)</label>
+                            <input type="number" id="oppMonths" required min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Expected Annual Return (%)</label>
+                            <input type="number" id="oppReturn" required min="0" step="0.01">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Calculate Cost</button>
+                </form>
+                <div id="opportunityCostResult" class="result-box"></div>
+            </section>
+        </div>
+
+        <!-- BEHAVIORAL TOOLS TAB -->
+        <div id="behavioral" class="tab-content">
+            <section class="card">
+                <h2>📊 Asset Allocation Optimizer</h2>
+                <form id="assetAllocationForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Your Age</label>
+                            <input type="number" id="age" required min="18">
+                        </div>
+                        <div class="form-group">
+                            <label>Risk Tolerance</label>
+                            <select id="riskTolerance" required>
+                                <option value="">Select...</option>
+                                <option value="conservative">Conservative</option>
+                                <option value="moderate">Moderate</option>
+                                <option value="aggressive">Aggressive</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Investment Timeline (Years)</label>
+                            <input type="number" id="timelineYears" required min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Monthly Investment (₹) - Optional</label>
+                            <input type="number" id="monthlyInvestment" min="0" step="0.01">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Get Allocation</button>
+                </form>
+                <div id="assetAllocationResult" class="result-box"></div>
+            </section>
+
+            <section class="card">
+                <h2>🔄 Dynamic Reallocation</h2>
+                <form id="dynamicReallocationForm">
+                    <div class="form-group">
+                        <label>Months Tracked</label>
+                        <input type="number" id="monthsTracked" required min="2">
+                    </div>
+                    <h3>Allocated vs Actual Spending</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Savings - Allocated (₹)</label>
+                            <input type="number" id="allocSavings" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Savings - Actual Spent (₹)</label>
+                            <input type="number" id="spentSavings" required min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Investments - Allocated (₹)</label>
+                            <input type="number" id="allocInvestments" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Investments - Actual Spent (₹)</label>
+                            <input type="number" id="spentInvestments" required min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Personal - Allocated (₹)</label>
+                            <input type="number" id="allocPersonal" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Personal - Actual Spent (₹)</label>
+                            <input type="number" id="spentPersonal" required min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Misc - Allocated (₹)</label>
+                            <input type="number" id="allocMisc" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Misc - Actual Spent (₹)</label>
+                            <input type="number" id="spentMisc" required min="0" step="0.01">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Analyze Spending</button>
+                </form>
+                <div id="dynamicReallocationResult" class="result-box"></div>
+            </section>
+
+            <section class="card">
+                <h2>💎 Micro-Savings Triggers</h2>
+                <div id="microSavingsInputs">
+                    <div class="micro-entry">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <input type="text" class="microCategory" placeholder="e.g., Dining">
+                            </div>
+                            <div class="form-group">
+                                <label>Budgeted (₹)</label>
+                                <input type="number" class="microBudgeted" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Actual Spent (₹)</label>
+                                <input type="number" class="microActual" min="0" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Savings Threshold (₹)</label>
+                    <input type="number" id="savingsThreshold" value="50" min="0" step="0.01">
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addMicroEntry()">+ Add Category</button>
+                <button type="button" class="btn btn-primary" onclick="calculateMicroSavings()">Calculate Savings</button>
+                <div id="microSavingsResult" class="result-box"></div>
+            </section>
+
+            <section class="card">
+                <h2>🔥 Streak Tracking</h2>
+                <div class="form-group">
+                    <label>Number of Months to Track</label>
+                    <input type="number" id="streakMonths" min="1" value="6">
+                </div>
+                <div id="streakInputs"></div>
+                <button type="button" class="btn btn-secondary" onclick="generateStreakInputs()">Generate Month Inputs</button>
+                <button type="button" class="btn btn-primary" onclick="calculateStreak()">Track Streak</button>
+                <div id="streakResult" class="result-box"></div>
+            </section>
+        </div>
+
+        <!-- STRATEGIC INTELLIGENCE TAB -->
+        <div id="strategic" class="tab-content">
+            <section class="card">
+                <h2>⚖️ Goal Conflict Resolver</h2>
+                <div class="form-group">
+                    <label>Monthly Income (₹)</label>
+                    <input type="number" id="conflictIncome" min="0" step="0.01">
+                </div>
+                <h3>Current Allocation</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Savings (₹)</label>
+                        <input type="number" id="conflictSavings" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Investments (₹)</label>
+                        <input type="number" id="conflictInvestments" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Personal (₹)</label>
+                        <input type="number" id="conflictPersonal" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Misc (₹)</label>
+                        <input type="number" id="conflictMisc" min="0" step="0.01">
+                    </div>
+                </div>
+                <div id="goalConflictInputs">
+                    <h3>Goals (Minimum 2)</h3>
+                    <div class="goal-entry">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Goal Name</label>
+                                <input type="text" class="goalName" placeholder="e.g., Emergency Fund">
+                            </div>
+                            <div class="form-group">
+                                <label>Target (₹)</label>
+                                <input type="number" class="goalTarget" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Timeline (Months)</label>
+                                <input type="number" class="goalTimeline" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Expected Return (%)</label>
+                                <input type="number" class="goalReturn" min="0" step="0.01" value="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="goal-entry">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Goal Name</label>
+                                <input type="text" class="goalName" placeholder="e.g., House Down Payment">
+                            </div>
+                            <div class="form-group">
+                                <label>Target (₹)</label>
+                                <input type="number" class="goalTarget" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Timeline (Months)</label>
+                                <input type="number" class="goalTimeline" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Expected Return (%)</label>
+                                <input type="number" class="goalReturn" min="0" step="0.01" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addGoalEntry()">+ Add Goal</button>
+                <button type="button" class="btn btn-primary" onclick="resolveGoalConflicts()">Resolve Conflicts</button>
+                <div id="goalConflictResult" class="result-box"></div>
+            </section>
+
+            <section class="card">
+                <h2>📈 Market-Aware Advisor</h2>
+                <form id="marketAdvisorForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Market Status</label>
+                            <select id="marketStatus" required>
+                                <option value="">Select...</option>
+                                <option value="dip">Dip</option>
+                                <option value="correction">Correction</option>
+                                <option value="neutral">Neutral</option>
+                                <option value="stable">Stable</option>
+                                <option value="peak">Peak</option>
+                                <option value="overvalued">Overvalued</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Volatility</label>
+                            <select id="volatility" required>
+                                <option value="">Select...</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Current Investment Allocation (₹)</label>
+                            <input type="number" id="marketInvestment" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Risk Tolerance</label>
+                            <select id="marketRisk" required>
+                                <option value="">Select...</option>
+                                <option value="conservative">Conservative</option>
+                                <option value="moderate">Moderate</option>
+                                <option value="aggressive">Aggressive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Get Market Advice</button>
+                </form>
+                <div id="marketAdvisorResult" class="result-box"></div>
+            </section>
+
+            <section class="card">
+                <h2>📊 Inflation Adjuster</h2>
+                <div class="form-group">
+                    <label>Current Inflation Rate (% annually)</label>
+                    <input type="number" id="inflationRate" min="0" step="0.01">
+                </div>
+                <div id="inflationGoalInputs">
+                    <h3>Goals to Adjust</h3>
+                    <div class="inflation-goal-entry">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Goal Name</label>
+                                <input type="text" class="infGoalName" placeholder="e.g., Retirement">
+                            </div>
+                            <div class="form-group">
+                                <label>Target (₹)</label>
+                                <input type="number" class="infGoalTarget" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Timeline (Months)</label>
+                                <input type="number" class="infGoalTimeline" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Expected Return (%)</label>
+                                <input type="number" class="infGoalReturn" min="0" step="0.01" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addInflationGoalEntry()">+ Add Goal</button>
+                <button type="button" class="btn btn-primary" onclick="adjustForInflation()">Adjust for Inflation</button>
+                <div id="inflationResult" class="result-box"></div>
+            </section>
+
+            <section class="card">
+                <h2>🏦 Bank Feed Integration (Demo)</h2>
+                <form id="bankFeedForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Monthly Income (₹)</label>
+                            <input type="number" id="bankIncome" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Variance (0-1)</label>
+                            <input type="number" id="bankVariance" value="0.1" min="0" max="1" step="0.01">
+                        </div>
+                    </div>
+                    <h3>Allocation</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Savings (₹)</label>
+                            <input type="number" id="bankSavings" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Investments (₹)</label>
+                            <input type="number" id="bankInvestments" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Personal (₹)</label>
+                            <input type="number" id="bankPersonal" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Misc (₹)</label>
+                            <input type="number" id="bankMisc" required min="0" step="0.01">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Simulate Bank Feed</button>
+                </form>
+                <div id="bankFeedResult" class="result-box"></div>
+            </section>
+        </div>
+
+        <footer>
+            <p>💡 Complete Financial Intelligence System | 14 Advanced Features</p>
+        </footer>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
