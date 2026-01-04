@@ -3,6 +3,295 @@ const API_BASE_URL = 'https://budgetingapp-q0wr.onrender.com';
 // Store budget allocation globally for use in combined goals
 let currentBudgetAllocation = null;
 
+// ADD THIS CODE TO THE TOP OF YOUR script.js FILE (after API_BASE_URL declaration)
+
+// ============================================================================
+// MOBILE MENU & TABLE SCROLL HANDLING
+// ============================================================================
+
+// Toggle sidebar menu
+function toggleMenu() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.overlay');
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+}
+
+// Close sidebar
+function closeSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.overlay');
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+}
+
+// Setup sidebar navigation
+function setupSidebarNav() {
+    // Clone desktop tabs to sidebar if not already done
+    const sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+    
+    const desktopTabs = document.querySelectorAll('.tabs .tab-btn');
+    
+    // Clear existing buttons in sidebar (except header)
+    const existingButtons = sidebar.querySelectorAll('.tab-btn');
+    existingButtons.forEach(btn => btn.remove());
+    
+    // Add tab buttons to sidebar
+    desktopTabs.forEach(tab => {
+        const sidebarBtn = tab.cloneNode(true);
+        sidebarBtn.addEventListener('click', () => {
+            const tabName = sidebarBtn.dataset.tab;
+            
+            // Update active states
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            // Activate selected tab
+            document.querySelectorAll(`[data-tab="${tabName}"]`).forEach(b => b.classList.add('active'));
+            document.getElementById(tabName).classList.add('active');
+            
+            // Close sidebar
+            closeSidebar();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        sidebar.appendChild(sidebarBtn);
+    });
+}
+
+// Handle table horizontal scroll detection
+function setupTableScroll() {
+    const tableScrolls = document.querySelectorAll('.table-scroll');
+    
+    tableScrolls.forEach(scroll => {
+        scroll.addEventListener('scroll', function() {
+            const isScrolled = this.scrollLeft > 20;
+            if (isScrolled) {
+                this.classList.add('scrolled');
+            } else {
+                this.classList.remove('scrolled');
+            }
+        });
+        
+        // Check initial scroll state
+        if (scroll.scrollLeft > 20) {
+            scroll.classList.add('scrolled');
+        }
+    });
+}
+
+// Wrap all tables in proper containers
+function wrapTables() {
+    // Find all tables that aren't already wrapped
+    const tables = document.querySelectorAll('table');
+    
+    tables.forEach(table => {
+        // Check if already wrapped
+        if (table.closest('.table-wrapper')) return;
+        
+        // Create wrappers
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-wrapper';
+        
+        const scroll = document.createElement('div');
+        scroll.className = 'table-scroll';
+        
+        // Wrap the table
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(scroll);
+        scroll.appendChild(table);
+    });
+    
+    // Setup scroll detection
+    setupTableScroll();
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    setupSidebarNav();
+    wrapTables();
+    
+    // Setup overlay click to close sidebar
+    const overlay = document.querySelector('.overlay');
+    if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+    }
+    
+    // Watch for dynamically added tables
+    const observer = new MutationObserver(() => {
+        wrapTables();
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+});
+
+// ============================================================================
+// UPDATE DISPLAY FUNCTIONS TO USE TABLE WRAPPERS
+// ============================================================================
+
+// Update the displayBudgetResult function
+function displayBudgetResult(result) {
+    const allocation = result.allocation;
+    const projections = result.projections;
+    
+    let html = '<h3>Monthly Allocation</h3>';
+    html += '<div class="table-wrapper"><div class="table-scroll"><table>';
+    html += '<thead><tr><th>Category</th><th>Amount</th></tr></thead><tbody>';
+    
+    for (const [category, amount] of Object.entries(allocation)) {
+        html += `<tr><td>${category.charAt(0).toUpperCase() + category.slice(1)}</td><td>${formatCurrency(amount)}</td></tr>`;
+    }
+    html += `<tr class="total-row"><td><strong>Total</strong></td><td><strong>${formatCurrency(result.total_allocated)}</strong></td></tr>`;
+    html += '</tbody></table></div></div>';
+    
+    html += '<h3>Projections</h3>';
+    html += '<div class="table-wrapper"><div class="table-scroll"><table>';
+    html += '<thead><tr><th>Category</th>';
+    for (const period of Object.keys(projections)) {
+        html += `<th>${period}</th>`;
+    }
+    html += '</tr></thead><tbody>';
+    
+    const categories = Object.keys(allocation);
+    for (const category of categories) {
+        html += `<tr><td>${category.charAt(0).toUpperCase() + category.slice(1)}</td>`;
+        for (const period of Object.keys(projections)) {
+            html += `<td>${formatCurrency(projections[period][category])}</td>`;
+        }
+        html += '</tr>';
+    }
+    
+    html += '<tr class="total-row"><td><strong>Total</strong></td>';
+    for (const period of Object.keys(projections)) {
+        const total = Object.values(projections[period]).reduce((sum, val) => sum + val, 0);
+        html += `<td><strong>${formatCurrency(total)}</strong></td>`;
+    }
+    html += '</tr></tbody></table></div></div>';
+    
+    html += '<div class="success">✅ Budget calculated! Now you can analyze your goals below.</div>';
+    
+    document.getElementById('budgetResult').innerHTML = html;
+    wrapTables();
+}
+
+// Update displayCombinedGoalsResult
+function displayCombinedGoalsResult(result) {
+    let html = '<h3>Goal Analysis</h3>';
+    html += '<div class="table-wrapper"><div class="table-scroll"><table>';
+    html += '<thead><tr><th>Goal Type</th><th>Required Monthly</th><th>Current Allocation</th><th>Gap</th></tr></thead><tbody>';
+    
+    const savingsStatus = result.savings_gap >= 0 ? '✔' : '✗';
+    const savingsGapStr = result.savings_gap >= 0 ? formatCurrency(result.savings_gap) : `-${formatCurrency(Math.abs(result.savings_gap))}`;
+    html += `<tr><td>${savingsStatus} Savings</td><td>${formatCurrency(result.required_monthly_savings)}</td><td>${formatCurrency(result.current_allocation.savings)}</td><td>${savingsGapStr}</td></tr>`;
+    
+    const investmentStatus = result.investment_gap >= 0 ? '✔' : '✗';
+    const investmentGapStr = result.investment_gap >= 0 ? formatCurrency(result.investment_gap) : `-${formatCurrency(Math.abs(result.investment_gap))}`;
+    html += `<tr><td>${investmentStatus} Investments</td><td>${formatCurrency(result.required_monthly_investment)}</td><td>${formatCurrency(result.current_allocation.investments)}</td><td>${investmentGapStr}</td></tr>`;
+    
+    html += '</tbody></table></div></div>';
+    
+    if (result.goals_met) {
+        html += '<div class="success">✅ Your current allocations meet both goals!</div>';
+    } else {
+        html += `<div class="warning">⚠️ Total Shortfall: ${formatCurrency(result.total_shortfall)}/month</div>`;
+        
+        if (result.new_allocation) {
+            html += '<h3>Unified Reallocation Plan</h3>';
+            html += '<div class="table-wrapper"><div class="table-scroll"><table>';
+            html += '<thead><tr><th>Category</th><th>Current</th><th>Suggested</th><th>Change</th></tr></thead><tbody>';
+            
+            const categories = ['savings', 'investments', 'personal', 'misc'];
+            for (const cat of categories) {
+                const current = result.current_allocation[cat];
+                const suggested = result.new_allocation[cat];
+                const change = suggested - current;
+                const changeStr = change > 0 ? `+${formatCurrency(change)}` : change < 0 ? `-${formatCurrency(Math.abs(change))}` : formatCurrency(0);
+                html += `<tr><td>${cat.charAt(0).toUpperCase() + cat.slice(1)}</td><td>${formatCurrency(current)}</td><td>${formatCurrency(suggested)}</td><td>${changeStr}</td></tr>`;
+            }
+            html += '</tbody></table></div></div>';
+        }
+    }
+    
+    const analysis = result.ai_analysis;
+    html += `<h3>AI Financial Advisor</h3><div class="ai-box">`;
+    html += `<p><strong>Allocation Health:</strong> ${analysis.allocation_health}</p>`;
+    
+    if (analysis.identified_leaks && analysis.identified_leaks.length > 0) {
+        html += '<p><strong>Identified Issues:</strong></p><ul>';
+        analysis.identified_leaks.forEach(leak => html += `<li>${leak}</li>`);
+        html += '</ul>';
+    }
+    
+    if (analysis.recommendations && analysis.recommendations.length > 0) {
+        html += '<p><strong>Recommendations:</strong></p><ul>';
+        analysis.recommendations.forEach(rec => html += `<li>${rec}</li>`);
+        html += '</ul>';
+    }
+    
+    if (analysis.priority_actions && analysis.priority_actions.length > 0) {
+        html += '<p><strong>Priority Actions:</strong></p><ul>';
+        analysis.priority_actions.forEach(action => html += `<li>${action}</li>`);
+        html += '</ul>';
+    }
+    
+    html += '</div>';
+    
+    document.getElementById('combinedGoalsResult').innerHTML = html;
+    wrapTables();
+}
+
+// Update displayTaxHarvesting
+function displayTaxHarvesting(result) {
+    if (!result.has_opportunities || !result.opportunities || result.opportunities.length === 0) {
+        document.getElementById('taxHarvestingResult').innerHTML = '<div class="success">✅ No tax-loss harvesting opportunities (all investments performing well)</div>';
+        return;
+    }
+    
+    let html = '<h3>Tax-Loss Harvesting Opportunities</h3>';
+    html += '<div class="table-wrapper"><div class="table-scroll"><table>';
+    html += '<thead><tr><th>Investment</th><th>Loss</th><th>Loss %</th><th>Tax Benefit</th></tr></thead><tbody>';
+    
+    let totalBenefit = 0;
+    result.opportunities.forEach(opp => {
+        html += `<tr><td>${opp.name}</td><td>${formatCurrency(opp.loss_amount)}</td><td>${opp.loss_pct.toFixed(1)}%</td><td>${formatCurrency(opp.tax_offset_benefit)}</td></tr>`;
+        totalBenefit += opp.tax_offset_benefit;
+    });
+    
+    html += `<tr class="total-row"><td><strong>Total Tax Benefit</strong></td><td></td><td></td><td><strong>${formatCurrency(totalBenefit)}</strong></td></tr>`;
+    html += '</tbody></table></div></div>';
+    html += `<p class="info">💡 Selling these before year-end can offset ${formatCurrency(totalBenefit)} in taxes</p>`;
+    
+    document.getElementById('taxHarvestingResult').innerHTML = html;
+    wrapTables();
+}
+
+// Update displayMicroSavings
+function displayMicroSavings(result) {
+    if (!result.has_savings || !result.data || !result.data.triggers || result.data.triggers.length === 0) {
+        document.getElementById('microSavingsResult').innerHTML = '<div class="success">✅ No micro-savings opportunities this period</div>';
+        return;
+    }
+    
+    let html = '<h3>Micro-Savings Triggers</h3>';
+    html += '<div class="table-wrapper"><div class="table-scroll"><table>';
+    html += '<thead><tr><th>Category</th><th>Budgeted</th><th>Actual</th><th>Saved</th><th>Action</th></tr></thead><tbody>';
+    
+    result.data.triggers.forEach(trigger => {
+        html += `<tr><td>${trigger.category}</td><td>${formatCurrency(trigger.budgeted)}</td><td>${formatCurrency(trigger.actual)}</td><td>${formatCurrency(trigger.saved)}</td><td>${trigger.action}</td></tr>`;
+    });
+    
+    html += `<tr class="total-row"><td><strong>Total Micro-Savings</strong></td><td></td><td></td><td><strong>${formatCurrency(result.data.total_micro_savings)}</strong></td><td></td></tr>`;
+    html += '</tbody></table></div></div>';
+    html += `<p class="highlight">💰 Auto-transfer ${formatCurrency(result.data.total_micro_savings)} to investments</p>`;
+    
+    document.getElementById('microSavingsResult').innerHTML = html;
+    wrapTables();
+}
 // ============================================================================
 // PROFILE STORAGE
 // ============================================================================

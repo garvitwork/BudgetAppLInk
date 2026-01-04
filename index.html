@@ -7,6 +7,25 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- ADD THESE ELEMENTS RIGHT AFTER THE OPENING <body> TAG IN YOUR index.html -->
+
+    <!-- Hamburger Menu Button -->
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+    <!-- Overlay for mobile menu -->
+    <div class="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-close" onclick="closeSidebar()">×</span>
+            Menu
+        </div>
+        <!-- Tab buttons will be dynamically added here by JavaScript -->
+    </div>
+
+    <!-- The rest of your HTML continues as normal... -->
+    <!-- Make sure the existing .tabs navigation stays in your HTML for desktop view -->
     <div class="container">
         <header>
             <h1>💰 Personal Finance Manager</h1>
