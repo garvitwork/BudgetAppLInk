@@ -560,16 +560,23 @@ document.getElementById('assetAllocationForm').addEventListener('submit', async 
 
 function displayAssetAllocation(result) {
     const alloc = result.allocation;
+    const monthlyInv = parseFloat(document.getElementById('monthlyInvestment').value);
+    
     let html = `<h3>Asset Allocation Optimizer</h3>
         <p><strong>Risk Profile:</strong> ${alloc.risk_profile}</p>
         <h4>Recommended Allocation:</h4>`;
     
-    if (result.monthly_breakdown) {
-        html += `<table><thead><tr><th>Asset</th><th>%</th><th>Monthly Amount</th></tr></thead><tbody>
-            <tr><td>📈 Stocks</td><td>${alloc.stocks}%</td><td>${formatCurrency(result.monthly_breakdown.stocks)}</td></tr>
-            <tr><td>📊 Bonds</td><td>${alloc.bonds}%</td><td>${formatCurrency(result.monthly_breakdown.bonds)}</td></tr>
-            <tr><td>💵 Cash</td><td>${alloc.cash}%</td><td>${formatCurrency(result.monthly_breakdown.cash)}</td></tr>
-        </tbody></table>`;
+    // Check if backend sent breakdown OR calculate it ourselves
+    const breakdown = result.monthly_breakdown || (monthlyInv && monthlyInv > 0 ? {
+        stocks: (alloc.stocks / 100) * monthlyInv,
+        bonds: (alloc.bonds / 100) * monthlyInv,
+        cash: (alloc.cash / 100) * monthlyInv
+    } : null);
+    
+    if (breakdown) {
+        html += `<p>📈 Stocks: ${alloc.stocks}% (${formatCurrency(breakdown.stocks)})</p>
+            <p>📊 Bonds: ${alloc.bonds}% (${formatCurrency(breakdown.bonds)})</p>
+            <p>💵 Cash: ${alloc.cash}% (${formatCurrency(breakdown.cash)})</p>`;
     } else {
         html += `<p>📈 Stocks: ${alloc.stocks}%</p>
             <p>📊 Bonds: ${alloc.bonds}%</p>
