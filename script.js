@@ -7,6 +7,246 @@ let currentBudgetAllocation = null;
 // PROFILE STORAGE
 // ============================================================================
 
+// Add these functions to your existing script.js file
+
+// ============================================================================
+// MOBILE OPTIMIZATION HELPERS
+// ============================================================================
+
+// Wrap all tables in scrollable containers
+function wrapTablesForMobile() {
+    const tables = document.querySelectorAll('table');
+    tables.forEach(table => {
+        if (!table.parentElement.classList.contains('table-container')) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'table-container';
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+        }
+    });
+}
+
+// Smooth scroll for tab navigation on mobile
+function setupMobileTabs() {
+    const tabs = document.querySelector('.tabs');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Scroll active tab into view on mobile
+            if (window.innerWidth <= 768) {
+                setTimeout(() => {
+                    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }, 100);
+            }
+        });
+    });
+}
+
+// Detect mobile and add class to body
+function detectMobile() {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile || window.innerWidth <= 768) {
+        document.body.classList.add('mobile-device');
+    }
+    
+    // Update on resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth <= 768) {
+            document.body.classList.add('mobile-device');
+        } else {
+            document.body.classList.remove('mobile-device');
+        }
+    });
+}
+
+// Prevent zoom on input focus for iOS
+function preventIOSZoom() {
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            if (window.innerWidth <= 768) {
+                this.style.fontSize = '16px';
+            }
+        });
+    });
+}
+
+// Add scroll indicators for tables on mobile
+function addScrollIndicators() {
+    const tableContainers = document.querySelectorAll('.table-container');
+    
+    tableContainers.forEach(container => {
+        container.addEventListener('scroll', function() {
+            const scrollLeft = this.scrollLeft;
+            const maxScroll = this.scrollWidth - this.clientWidth;
+            
+            // Hide scroll indicator when fully scrolled
+            if (scrollLeft >= maxScroll - 10) {
+                this.classList.add('scrolled-end');
+            } else {
+                this.classList.remove('scrolled-end');
+            }
+        });
+    });
+}
+
+// Initialize mobile optimizations
+document.addEventListener('DOMContentLoaded', () => {
+    detectMobile();
+    setupMobileTabs();
+    preventIOSZoom();
+    
+    // Wrap tables after any content loads
+    const observer = new MutationObserver(() => {
+        wrapTablesForMobile();
+        addScrollIndicators();
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+});
+
+// Update existing display functions to wrap tables
+function displayBudgetResult(result) {
+    const allocation = result.allocation;
+    const projections = result.projections;
+    
+    let html = '<h3>Monthly Allocation</h3><div class="table-container"><table><thead><tr><th>Category</th><th>Amount</th></tr></thead><tbody>';
+    
+    for (const [category, amount] of Object.entries(allocation)) {
+        html += `<tr><td>${category.charAt(0).toUpperCase() + category.slice(1)}</td><td>${formatCurrency(amount)}</td></tr>`;
+    }
+    html += `<tr class="total-row"><td><strong>Total</strong></td><td><strong>${formatCurrency(result.total_allocated)}</strong></td></tr>`;
+    html += '</tbody></table></div>';
+    
+    html += '<h3>Projections</h3><div class="table-container"><table><thead><tr><th>Category</th>';
+    for (const period of Object.keys(projections)) {
+        html += `<th>${period}</th>`;
+    }
+    html += '</tr></thead><tbody>';
+    
+    const categories = Object.keys(allocation);
+    for (const category of categories) {
+        html += `<tr><td>${category.charAt(0).toUpperCase() + category.slice(1)}</td>`;
+        for (const period of Object.keys(projections)) {
+            html += `<td>${formatCurrency(projections[period][category])}</td>`;
+        }
+        html += '</tr>';
+    }
+    
+    html += '<tr class="total-row"><td><strong>Total</strong></td>';
+    for (const period of Object.keys(projections)) {
+        const total = Object.values(projections[period]).reduce((sum, val) => sum + val, 0);
+        html += `<td><strong>${formatCurrency(total)}</strong></td>`;
+    }
+    html += '</tr></tbody></table></div>';
+    
+    html += '<div class="success">✅ Budget calculated! Now you can analyze your goals below.</div>';
+    
+    document.getElementById('budgetResult').innerHTML = html;
+}
+
+function displayCombinedGoalsResult(result) {
+    let html = '<h3>Goal Analysis</h3><div class="table-container"><table><thead><tr><th>Goal Type</th><th>Required Monthly</th><th>Current Allocation</th><th>Gap</th></tr></thead><tbody>';
+    
+    const savingsStatus = result.savings_gap >= 0 ? '✔' : '✗';
+    const savingsGapStr = result.savings_gap >= 0 ? formatCurrency(result.savings_gap) : `-${formatCurrency(Math.abs(result.savings_gap))}`;
+    html += `<tr><td>${savingsStatus} Savings</td><td>${formatCurrency(result.required_monthly_savings)}</td><td>${formatCurrency(result.current_allocation.savings)}</td><td>${savingsGapStr}</td></tr>`;
+    
+    const investmentStatus = result.investment_gap >= 0 ? '✔' : '✗';
+    const investmentGapStr = result.investment_gap >= 0 ? formatCurrency(result.investment_gap) : `-${formatCurrency(Math.abs(result.investment_gap))}`;
+    html += `<tr><td>${investmentStatus} Investments</td><td>${formatCurrency(result.required_monthly_investment)}</td><td>${formatCurrency(result.current_allocation.investments)}</td><td>${investmentGapStr}</td></tr>`;
+    
+    html += '</tbody></table></div>';
+    
+    if (result.goals_met) {
+        html += '<div class="success">✅ Your current allocations meet both goals!</div>';
+    } else {
+        html += `<div class="warning">⚠️ Total Shortfall: ${formatCurrency(result.total_shortfall)}/month</div>`;
+        
+        if (result.new_allocation) {
+            html += '<h3>Unified Reallocation Plan</h3><div class="table-container"><table><thead><tr><th>Category</th><th>Current</th><th>Suggested</th><th>Change</th></tr></thead><tbody>';
+            
+            const categories = ['savings', 'investments', 'personal', 'misc'];
+            for (const cat of categories) {
+                const current = result.current_allocation[cat];
+                const suggested = result.new_allocation[cat];
+                const change = suggested - current;
+                const changeStr = change > 0 ? `+${formatCurrency(change)}` : change < 0 ? `-${formatCurrency(Math.abs(change))}` : formatCurrency(0);
+                html += `<tr><td>${cat.charAt(0).toUpperCase() + cat.slice(1)}</td><td>${formatCurrency(current)}</td><td>${formatCurrency(suggested)}</td><td>${changeStr}</td></tr>`;
+            }
+            html += '</tbody></table></div>';
+        }
+    }
+    
+    const analysis = result.ai_analysis;
+    html += `<h3>AI Financial Advisor</h3><div class="ai-box">`;
+    html += `<p><strong>Allocation Health:</strong> ${analysis.allocation_health}</p>`;
+    
+    if (analysis.identified_leaks && analysis.identified_leaks.length > 0) {
+        html += '<p><strong>Identified Issues:</strong></p><ul>';
+        analysis.identified_leaks.forEach(leak => html += `<li>${leak}</li>`);
+        html += '</ul>';
+    }
+    
+    if (analysis.recommendations && analysis.recommendations.length > 0) {
+        html += '<p><strong>Recommendations:</strong></p><ul>';
+        analysis.recommendations.forEach(rec => html += `<li>${rec}</li>`);
+        html += '</ul>';
+    }
+    
+    if (analysis.priority_actions && analysis.priority_actions.length > 0) {
+        html += '<p><strong>Priority Actions:</strong></p><ul>';
+        analysis.priority_actions.forEach(action => html += `<li>${action}</li>`);
+        html += '</ul>';
+    }
+    
+    html += '</div>';
+    
+    document.getElementById('combinedGoalsResult').innerHTML = html;
+}
+
+function displayTaxHarvesting(result) {
+    if (!result.has_opportunities || !result.opportunities || result.opportunities.length === 0) {
+        document.getElementById('taxHarvestingResult').innerHTML = '<div class="success">✅ No tax-loss harvesting opportunities (all investments performing well)</div>';
+        return;
+    }
+    
+    let html = '<h3>Tax-Loss Harvesting Opportunities</h3><div class="table-container"><table><thead><tr><th>Investment</th><th>Loss</th><th>Loss %</th><th>Tax Benefit</th></tr></thead><tbody>';
+    
+    let totalBenefit = 0;
+    result.opportunities.forEach(opp => {
+        html += `<tr><td>${opp.name}</td><td>${formatCurrency(opp.loss_amount)}</td><td>${opp.loss_pct.toFixed(1)}%</td><td>${formatCurrency(opp.tax_offset_benefit)}</td></tr>`;
+        totalBenefit += opp.tax_offset_benefit;
+    });
+    
+    html += `<tr class="total-row"><td><strong>Total Tax Benefit</strong></td><td></td><td></td><td><strong>${formatCurrency(totalBenefit)}</strong></td></tr></tbody></table></div>`;
+    html += `<p class="info">💡 Selling these before year-end can offset ${formatCurrency(totalBenefit)} in taxes</p>`;
+    
+    document.getElementById('taxHarvestingResult').innerHTML = html;
+}
+
+function displayMicroSavings(result) {
+    if (!result.has_savings || !result.data || !result.data.triggers || result.data.triggers.length === 0) {
+        document.getElementById('microSavingsResult').innerHTML = '<div class="success">✅ No micro-savings opportunities this period</div>';
+        return;
+    }
+    
+    let html = '<h3>Micro-Savings Triggers</h3><div class="table-container"><table><thead><tr><th>Category</th><th>Budgeted</th><th>Actual</th><th>Saved</th><th>Action</th></tr></thead><tbody>';
+    
+    result.data.triggers.forEach(trigger => {
+        html += `<tr><td>${trigger.category}</td><td>${formatCurrency(trigger.budgeted)}</td><td>${formatCurrency(trigger.actual)}</td><td>${formatCurrency(trigger.saved)}</td><td>${trigger.action}</td></tr>`;
+    });
+    
+    html += `<tr class="total-row"><td><strong>Total Micro-Savings</strong></td><td></td><td></td><td><strong>${formatCurrency(result.data.total_micro_savings)}</strong></td><td></td></tr></tbody></table></div>`;
+    html += `<p class="highlight">💰 Auto-transfer ${formatCurrency(result.data.total_micro_savings)} to investments</p>`;
+    
+    document.getElementById('microSavingsResult').innerHTML = html;
+}
+
 function saveProfile() {
     const profile = {
         totalAmount: document.getElementById('totalAmount').value,

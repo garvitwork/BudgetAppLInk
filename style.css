@@ -409,12 +409,23 @@ header h1 {
     margin: 20px 0;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    position: relative;
+}
+
+.table-container::after {
+    content: '← Scroll →';
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    font-size: 11px;
+    color: #999;
+    pointer-events: none;
+    display: none;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 500px;
     background: white;
 }
 
@@ -712,19 +723,29 @@ footer {
 
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 0;
+    }
+
+    .container {
+        border-radius: 0;
+        margin: 0;
     }
 
     header h1 {
-        font-size: 2em;
+        font-size: 1.8em;
     }
 
     .subtitle {
-        font-size: 1em;
+        font-size: 0.95em;
+    }
+
+    header {
+        padding: 25px 20px;
     }
 
     .profile-section {
-        padding: 20px 15px;
+        padding: 20px;
+        border-radius: 0;
     }
 
     .profile-buttons {
@@ -735,6 +756,8 @@ footer {
     .profile-buttons .btn {
         max-width: 100%;
         width: 100%;
+        font-size: 16px;
+        padding: 16px 20px;
     }
     
     .notification {
@@ -748,26 +771,36 @@ footer {
 
     .tabs {
         border-bottom: 2px solid #e9ecef;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: #f8f9fa;
     }
 
     .tab-btn {
-        min-width: 150px;
-        padding: 16px 20px;
-        font-size: 0.95em;
+        min-width: 140px;
+        padding: 16px 18px;
+        font-size: 0.9em;
     }
 
     .tab-content {
-        padding: 20px 15px;
+        padding: 20px;
     }
 
     .card {
         padding: 20px;
         margin-bottom: 20px;
-        border-radius: 12px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    .card:first-child {
+        margin-top: 0;
     }
 
     .card h2 {
-        font-size: 1.5em;
+        font-size: 1.4em;
     }
 
     .form-row {
@@ -778,18 +811,41 @@ footer {
     .btn {
         width: 100%;
         margin-right: 0;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         padding: 16px 24px;
-        font-size: 1.05em;
+        font-size: 16px;
+        border-radius: 12px;
+    }
+
+    /* Mobile Table Optimization */
+    .table-container {
+        margin: 20px -20px;
+        border-radius: 0;
+        box-shadow: none;
+        border-top: 1px solid #e9ecef;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .table-container::after {
+        display: block;
     }
 
     table {
-        font-size: 0.85em;
-        min-width: 450px;
+        font-size: 14px;
     }
 
-    th, td {
-        padding: 12px 10px;
+    th {
+        padding: 14px 12px;
+        font-size: 13px;
+        position: sticky;
+        top: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        z-index: 10;
+    }
+
+    td {
+        padding: 12px;
+        white-space: nowrap;
     }
 
     .result-box,
@@ -797,6 +853,16 @@ footer {
     .forecast-box,
     .suggestion-box {
         padding: 18px;
+        margin: 15px 0;
+    }
+
+    /* Better spacing for mobile */
+    .success,
+    .warning,
+    .error,
+    .info,
+    .highlight {
+        margin: 15px 0;
     }
 }
 
@@ -806,37 +872,43 @@ footer {
 
 @media (max-width: 480px) {
     body {
-        padding: 8px;
+        padding: 0;
     }
 
     .container {
-        border-radius: 15px;
+        border-radius: 0;
     }
 
     header {
-        padding: 30px 20px;
+        padding: 25px 15px;
     }
 
     header h1 {
-        font-size: 1.6em;
+        font-size: 1.5em;
+        line-height: 1.3;
     }
 
     .subtitle {
-        font-size: 0.9em;
+        font-size: 0.85em;
     }
 
     .profile-section {
-        padding: 18px 12px;
+        padding: 18px 15px;
         margin: 0;
+        border-radius: 0;
     }
 
     .profile-buttons .btn {
-        padding: 14px 20px;
-        font-size: 14px;
+        padding: 16px 20px;
+        font-size: 15px;
+        border-radius: 10px;
     }
 
     .tabs {
         scrollbar-width: none;
+        position: sticky;
+        top: 0;
+        z-index: 100;
     }
 
     .tabs::-webkit-scrollbar {
@@ -844,69 +916,121 @@ footer {
     }
 
     .tab-btn {
-        min-width: 130px;
+        min-width: 120px;
         padding: 14px 16px;
-        font-size: 0.9em;
+        font-size: 0.85em;
     }
 
     .tab-content {
-        padding: 15px 12px;
+        padding: 15px;
     }
 
     .card {
-        padding: 18px;
-        border-radius: 10px;
+        padding: 18px 15px;
+        border-radius: 0;
+        margin-bottom: 0;
+        border-left: none;
+        border-right: none;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .card:last-child {
+        border-bottom: 1px solid #e9ecef;
     }
 
     .card h2 {
-        font-size: 1.3em;
-        margin-bottom: 20px;
+        font-size: 1.25em;
+        margin-bottom: 18px;
     }
 
     .card h3 {
-        font-size: 1.1em;
+        font-size: 1.05em;
+        margin-top: 18px;
+    }
+
+    .card h4 {
+        font-size: 0.95em;
     }
 
     .form-group {
         margin-bottom: 16px;
     }
 
+    .form-group label {
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
     .form-group input,
     .form-group select {
-        padding: 12px 14px;
+        padding: 14px;
         font-size: 16px; /* Prevents zoom on iOS */
+        border-radius: 8px;
+    }
+
+    .form-row {
+        gap: 12px;
     }
 
     .btn {
-        padding: 14px 20px;
-        font-size: 1em;
-        margin-bottom: 8px;
+        padding: 16px 20px;
+        font-size: 15px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    .btn:last-child {
+        margin-bottom: 0;
     }
 
     /* Mobile-optimized table scrolling */
     .table-container {
-        margin: 15px -12px;
+        margin: 20px -15px;
         border-radius: 0;
+        box-shadow: none;
+        border-top: 2px solid #e9ecef;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .table-container::after {
+        display: block;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+        padding: 5px 10px;
+        border-radius: 4px;
     }
 
     table {
-        font-size: 0.8em;
-        min-width: 400px;
+        font-size: 13px;
     }
 
     th {
-        padding: 12px 8px;
-        font-size: 0.85em;
+        padding: 12px 10px;
+        font-size: 12px;
+        position: sticky;
+        top: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        z-index: 10;
     }
 
     td {
-        padding: 10px 8px;
+        padding: 10px;
+        font-size: 13px;
+        white-space: nowrap;
     }
 
+    /* Compact result boxes for mobile */
     .result-box,
     .ai-box {
-        padding: 16px;
+        padding: 15px;
         margin: 15px 0;
+        border-radius: 8px;
+    }
+
+    .result-box h3,
+    .ai-box h3 {
+        font-size: 1.1em;
+        margin-bottom: 12px;
     }
 
     .success,
@@ -914,8 +1038,10 @@ footer {
     .error,
     .info,
     .highlight {
-        padding: 14px 16px;
-        font-size: 0.95em;
+        padding: 12px 15px;
+        font-size: 14px;
+        margin: 12px 0;
+        border-radius: 8px;
     }
 
     .forecast-box,
@@ -923,27 +1049,119 @@ footer {
     .market-rec,
     .inflation-box,
     .goal-box {
-        padding: 16px;
+        padding: 15px;
         margin: 12px 0;
+        border-radius: 8px;
+    }
+
+    .forecast-box h4,
+    .suggestion-box h4,
+    .market-rec h4,
+    .inflation-box h4,
+    .goal-box h4 {
+        font-size: 1em;
+        margin-bottom: 10px;
     }
 
     .investment-entry,
     .micro-entry,
     .goal-entry,
     .inflation-goal-entry {
-        padding: 16px;
+        padding: 15px;
         margin: 12px 0;
+        border-radius: 8px;
+    }
+
+    .streak-month {
+        padding: 12px 15px;
+        margin: 8px 0;
+    }
+
+    .streak-month input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
     }
 
     footer {
         padding: 20px 15px;
-        font-size: 0.9em;
+        font-size: 0.85em;
+        border-radius: 0;
+    }
+
+    /* Improve readability on small screens */
+    p {
+        line-height: 1.6;
+    }
+
+    ul, ol {
+        padding-left: 20px;
+    }
+
+    li {
+        margin: 6px 0;
     }
 }
 
 /* ============================================================================
-   ACCESSIBILITY
+   MOBILE-SPECIFIC ENHANCEMENTS
    ============================================================================ */
+
+/* Smooth scrolling for the entire page */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Better touch targets */
+.mobile-device button,
+.mobile-device input,
+.mobile-device select {
+    min-height: 44px;
+}
+
+/* Hide scroll indicator when scrolled to end */
+.table-container.scrolled-end::after {
+    display: none;
+}
+
+/* Sticky header on mobile */
+@media (max-width: 768px) {
+    header {
+        position: sticky;
+        top: 0;
+        z-index: 99;
+    }
+}
+
+/* Pull to refresh indicator (visual only) */
+@media (max-width: 768px) {
+    body {
+        overscroll-behavior-y: contain;
+    }
+}
+
+/* Better tap highlight color */
+* {
+    -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
+}
+
+/* Landscape mode optimization for phones */
+@media (max-width: 768px) and (orientation: landscape) {
+    header {
+        padding: 15px 20px;
+    }
+    
+    header h1 {
+        font-size: 1.4em;
+    }
+    
+    .subtitle {
+        font-size: 0.85em;
+    }
+    
+    .tab-btn {
+        padding: 12px 16px;
+    }
+}
 
 @media (prefers-reduced-motion: reduce) {
     *,
